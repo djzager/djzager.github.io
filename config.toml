@@ -1,0 +1,44 @@
+baseurl = "https://example.com"
+languageCode = "en-us"
+title = "@djzager"
+theme = "kiss"
+copyright = "&copy; <a href=\"https://github.com/djzager\">David Zager</a> 2017"
+disqusShortname = ""
+googleAnalytics = ""
+# Number of posts per page
+Paginate = 5
+enableRobotsTXT = true
+
+
+[params.assets]
+customCSS = ["css/custom.css"]
+
+[params.info]
+adsense = "" # Adsense ID (ID only, without ca-pub-)
+enableSocial = true # Adds OpenGraph and Twitter cards
+homeTitle = "" # Title for home page
+poweredby = true # Adds powered by hugo and kiss below Copyright
+
+[params.opengraph.facebook]
+admins = [] # array of Facebook IDs
+appID = ""
+pageID = ""
+
+[params.opengraph.twitter]
+page = "" # Twitter Page username. If not set, params.social.twitter will be used.
+
+[params.social]
+
+twitter = "djzager"
+github = "djzager"
+email = "david.j.zager@gmail.com"
+linkedin = "djzager"
+facebook = "djzager"
+instagram = ""
+codepen = ""
+
+[taxonomies]
+tag ="tags"
+
+[blackfriday]
+hrefTargetBlank = true
