@@ -1,6 +1,6 @@
 baseurl = "https://djzager.github.io"
 languageCode = "en-us"
-title = "David Zager's Personal Website"
+title = "David Zager's Blog"
 author = "@djzager"
 theme = "kiss"
 copyright = "&copy; <a href=\"https://github.com/djzager\">David Zager</a> 2017"
@@ -9,7 +9,6 @@ googleAnalytics = ""
 # Number of posts per page
 Paginate = 5
 enableRobotsTXT = true
-
 
 [params.assets]
 customCSS = ["css/custom.css"]
@@ -34,7 +33,7 @@ twitter = "djzager"
 github = "djzager"
 email = "david.j.zager@gmail.com"
 linkedin = "djzager"
-facebook = "djzager"
+facebook = ""
 instagram = ""
 codepen = ""
 
