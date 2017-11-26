@@ -7,17 +7,35 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/djzager&#34;&gt;David Zager&lt;/a&gt; 2017</copyright>
-    <lastBuildDate>Wed, 15 Nov 2017 15:09:08 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 25 Nov 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://djzager.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>First</title>
-      <link>https://djzager.github.io/tags/first/</link>
-      <pubDate>Wed, 15 Nov 2017 15:09:08 +0000</pubDate>
+      <title>Git</title>
+      <link>https://djzager.github.io/tags/git/</link>
+      <pubDate>Sat, 25 Nov 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://djzager.github.io/tags/first/</guid>
+      <guid>https://djzager.github.io/tags/git/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Github</title>
+      <link>https://djzager.github.io/tags/github/</link>
+      <pubDate>Sat, 25 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://djzager.github.io/tags/github/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hugo</title>
+      <link>https://djzager.github.io/tags/hugo/</link>
+      <pubDate>Sat, 25 Nov 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://djzager.github.io/tags/hugo/</guid>
       <description></description>
     </item>
     

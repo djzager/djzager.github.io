@@ -7,18 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/djzager&#34;&gt;David Zager&lt;/a&gt; 2017</copyright>
-    <lastBuildDate>Wed, 15 Nov 2017 15:09:08 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 25 Nov 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://djzager.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>My First Post</title>
-      <link>https://djzager.github.io/posts/1-my-first-post/</link>
-      <pubDate>Wed, 15 Nov 2017 15:09:08 +0000</pubDate>
+      <title>Personal GitHub Pages with Hugo&#39;s Website Generator</title>
+      <link>https://djzager.github.io/posts/1-hugo-and-ghpages/</link>
+      <pubDate>Sat, 25 Nov 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://djzager.github.io/posts/1-my-first-post/</guid>
-      <description>A placeholder until I have actual content.</description>
+      <guid>https://djzager.github.io/posts/1-hugo-and-ghpages/</guid>
+      <description>I am excited to maintain a blog and there seems no better way to get things rolling than to document the start. When I started playing with Hugo and thinking about how I would integrate it with Personal GitHub Pages, I assumed it would be a trivial operation. Turns out there are a few gotchas worth documenting. This post will simply cover creating a static website using Hugo&amp;rsquo;s Website Generator and making it work with Personal GitHub Pages.</description>
     </item>
     
   </channel>
