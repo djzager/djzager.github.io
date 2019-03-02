@@ -11,6 +11,11 @@ Paginate = 5
 enableRobotsTXT = true
 enableEmoji = true
 
+[params.rss]
+includeContent = true
+authorName = "David Zager"
+authorEmail = "david.j.zager@gmail.com"
+
 [params.assets]
 customCSS = ["css/custom.css"]
 
@@ -19,6 +24,7 @@ adsense = "" # Adsense ID (ID only, without ca-pub-)
 enableSocial = true # Adds OpenGraph and Twitter cards
 homeTitle = "" # Title for home page
 poweredby = true # Adds powered by hugo and kiss below Copyright
+related = true
 
 [params.opengraph.facebook]
 admins = [] # array of Facebook IDs
@@ -37,6 +43,7 @@ linkedin = "djzager"
 facebook = ""
 instagram = ""
 codepen = ""
+rs = "index.xml"
 
 [taxonomies]
 tag ="tags"
