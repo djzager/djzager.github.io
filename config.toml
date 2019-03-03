@@ -45,6 +45,9 @@ instagram = ""
 codepen = ""
 rs = "index.xml"
 
+[params.social.config]
+platforms = ["twitter", "github", "linkedin", "email", "rs"]
+
 [taxonomies]
 tag ="tags"
 
