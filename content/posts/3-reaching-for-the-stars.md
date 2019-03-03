@@ -309,3 +309,5 @@ Now that I have shown you how to build an Ansible Role to manage an application 
 1. Use the [Ansible `k8s` module](https://docs.ansible.com/ansible/latest/modules/k8s_module.html).
 1. Start flooding [Ansible Galaxy](https://galaxy.ansible.com) with roles managing Kubernetes applications.
 1. Check out [Operator SDK](https://github.com/operator-framework/operator-sdk) and join us on the [Operator Framework mailing list](https://groups.google.com/forum/#!forum/operator-framework).
+
+:thumbsup:
