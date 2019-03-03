@@ -1,6 +1,6 @@
 ---
 title: "Reaching for the Stars with Ansible Operator"
-description: ""
+description: "Using Ansible Galaxy to create Kubernetes native applications"
 tags: ["Ansible", "Ansible Galaxy", "Ansible Operator", "OpenShift", "Kubernetes"]
 cover: https://example.com/img/1/image.jpg
 date: 2019-03-02T21:50:22Z
