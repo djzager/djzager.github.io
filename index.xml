@@ -7,10 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; &lt;a href=&#34;https://github.com/djzager&#34;&gt;David Zager&lt;/a&gt; 2017</copyright>
-    <lastBuildDate>Sat, 25 Nov 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 02 Mar 2019 21:50:22 +0000</lastBuildDate>
     
 	<atom:link href="https://djzager.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Reaching for the Stars with Ansible Operator</title>
+      <link>https://djzager.github.io/posts/3-reaching-for-the-stars/</link>
+      <pubDate>Sat, 02 Mar 2019 21:50:22 +0000</pubDate>
+      
+      <guid>https://djzager.github.io/posts/3-reaching-for-the-stars/</guid>
+      <description>My copy of the post on the Red Hat OpenShift Blog.
+In this post I will show you how to use Roles published to Ansible Galaxy as an Operator to manage an application in Kubernetes. Reusing a Role in this way provides an example of how to create an Operator that simply installs an application with the flexibility to expand and customize the behavior organically as requirements dictate.
+I will leverage both the Ansible Operator and the k8s module to demonstrate how you can use Ansible to create Kubernetes native applications.</description>
+    </item>
     
     <item>
       <title>Personal GitHub Pages with Hugo&#39;s Website Generator</title>

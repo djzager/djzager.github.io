@@ -3,13 +3,36 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://djzager.github.io/posts/3-reaching-for-the-stars/</loc>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://djzager.github.io/posts/1-hugo-and-ghpages/</loc>
     <lastmod>2017-11-25T00:00:00+00:00</lastmod>
   </url>
   
   <url>
+    <loc>https://djzager.github.io/tags/ansible/</loc>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://djzager.github.io/tags/ansible-galaxy/</loc>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://djzager.github.io/tags/ansible-operator/</loc>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://djzager.github.io/</loc>
-    <lastmod>2017-11-25T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -32,14 +55,26 @@
   </url>
   
   <url>
+    <loc>https://djzager.github.io/tags/kubernetes/</loc>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://djzager.github.io/tags/openshift/</loc>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://djzager.github.io/posts/</loc>
-    <lastmod>2017-11-25T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://djzager.github.io/tags/</loc>
-    <lastmod>2017-11-25T00:00:00+00:00</lastmod>
+    <lastmod>2019-03-02T21:50:22+00:00</lastmod>
     <priority>0</priority>
   </url>
   
