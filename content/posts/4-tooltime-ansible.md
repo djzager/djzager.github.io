@@ -9,8 +9,23 @@ date: 2019-03-06T17:23:58Z
 draft: true
 ---
 
+[Ansible](https://www.ansible.com/) is a powerful tool, not only for automating
+applications and IT infrastructure, but also for automating Kubernetes
+applications with the [`k8s` module](https://docs.ansible.com/ansible/latest/modules/k8s_module.html).
+In this post, I will start by creating an Ansible Role to package a simple
+stateless Kubernetes application deployment (you may recognize it from the [Kubernetes
+docs](https://kubernetes.io/docs/tasks/run-application/run-stateless-application-deployment/))
+and iteratively add capabilities. My goal is to demonstrate the flexibility of
+Ansible and the `k8s` module and how it allows you to start small, with a couple
+of YAML files, growing your
+
+and show you how Ansible gives you both a means for packaging your Kubernetes
+application as well as the ability to start small,
+
+
+Ansible
+
 I want to talk to you about the power of the
-[Ansible k8s module](https://docs.ansible.com/ansible/latest/modules/k8s_module.html)
 and how it can help you when creating developing applications in Kubernetes.
 
 Ansible Roles written using the `k8s` module are an excellent way of packaging
