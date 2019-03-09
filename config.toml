@@ -10,6 +10,7 @@ googleAnalytics = ""
 Paginate = 5
 enableRobotsTXT = true
 enableEmoji = true
+pygmentsCodeFences = true
 
 [params.rss]
 includeContent = true
