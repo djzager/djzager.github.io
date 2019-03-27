@@ -202,6 +202,10 @@ conditionals in Ansible to make our application adapt to available APIs.
 
 # Conditionals
 
+Now that we have a Role that can manage our application in Kubernetes, we want
+to extend it to make use of available APIs in the cluster we are deployed to.
+When our application is deployed in an OpenShift cluster, we can write our Role
+in such a way that it discovers the available APIs and adjusts accordingly.
 First, create the Route definition `files/route.yaml`:
 
 ```yaml
@@ -271,10 +275,8 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=4    changed=2    unreachable=0    failed=0
 ```
 
-
-
 Simple enough, we now have an application that can ask the API server for the
-API groups and make use of them if they are available. Uninstalling our Nginx
+API groups and make use of specific APIs if they are available. Uninstalling our Nginx
 application is as easy as `ansible-playbook playbook.yml -e state=absent`.
 Wouldn't it be great if we could name our objects something other than
 `example-nginx` and set the number of replicas in our Deployment? Next, we'll
@@ -549,12 +551,11 @@ playbook you will notice that the Deployment is **not** updated. To get that
 behavior I would need to include an `{% else %}`, set `volumeMounts: []` and
 `volumes: []`, and use `merge_type: merge` in the task to create the Deployment.
 
-# Configure Nginx: Now we are High Speed, Low Drag
+# Application Configuration
 
 One last thing that I would like to do with my simple Nginx app is to make the
-number of Nginx worker processes and worker connections configurable. This is
-not __necessary__ in our case, but it wouldn't be tool time if we didn't go over
-the top. I also want to bounce the Nginx `Pods` when the configuration changes.
+number of Nginx worker processes and worker connections configurable.
+I also want to bounce the Nginx `Pods` when the configuration changes.
 Set defaults in `defaults/main.yml`:
 
 ```diff
@@ -663,7 +664,9 @@ the rest of the `/etc/nginx` directory in the running container. Now update
      definition: "{{ lookup('template', 'deployment.yaml.j2') | from_yaml }}"
 ```
 
-Now all we need is to handle our `kill nginx pods` notification. Create
+Now all we need is to handle our `kill nginx pods` notification. The idea is to
+simply kill each of the Nginx pods in our deployment, allow them to be
+re-created, and the new Nginx pods will pick up the new configuration: Create
 `handlers/main.yml`:
 
 ```yaml
@@ -681,9 +684,48 @@ Now all we need is to handle our `kill nginx pods` notification. Create
   loop: "{{ q('k8s', api_version='v1', kind='Pod', namespace=namespace, label_selector=('app=' + name)) }}"
 ```
 
-This will delete all of the Nginx pods, letting Kubernetes redeploy, and the new
-running Nginx pods will pick up the new configuration.
+Great! We now expose Nginx configuration values to consumers of our Role and can
+handle updates to our configuration after Nginx has already been installed in
+the cluster.
 
-# The End
+**NOTE**
 
+This is not the best way to handle an updated `ConfigMap`. Fortunately, in the next
+version of Ansible, the `k8s` module will support the [`append_hash`
+parameter](https://docs.ansible.com/ansible/devel/modules/k8s_module.html#parameters)
+allowing you to uniquely name your `ConfigMap` based on the definition.
+The proper way to handle this would be to create the `ConfigMap` using
+`append_hash` to get a unique name for our `ConfigMap`, then the subsequent
+update to the `Deployment` would force a rollout of our deployment.
 
+# What's Next?
+
+To recap we:
+
+* Started with a simple stateless application definition comprised of
+    Deployment and Service YAML files
+* Extended our application to support Routes and DeploymentConfigs using the
+    `k8s` lookup plugin to discover available APIs and react accordingly
+* Made the name, image, and size of our application configurable
+* Added a discovery mechanism to allow the default application landing page to
+    be overridden
+* Exposed application configuration values, stored them in a `ConfigMap`, and
+    loaded them into our application using volume mounts
+
+All of this was to show you the power of Ansible to mange applications in
+Kubernetes. Ansible, and the `k8s` module and lookup plugin, give you the
+flexibility to start as small as two YAML files and grow to a cluster agnostic
+application. Not only that, but you could easily follow the template [Reaching
+for the Stars with Ansible Galaxy](https://blog.openshift.com/reaching-for-the-stars-with-ansible-operator/)
+to make your application Kubernetes native.
+
+What happens next is totally up to you. Some resources that may be useful:
+
+* [`k8s` module `latest`](https://docs.ansible.com/ansible/latest/modules/k8s_module.html)
+* [`k8s` module `devel`](https://docs.ansible.com/ansible/devel/modules/k8s_module.html) if
+    the `append_hash` parameter would help you when creating `ConfigMap`s
+* [`k8s` lookup plugin](https://docs.ansible.com/ansible/latest/plugins/lookup/k8s.html)
+* The source for the Ansible used in this post can be found
+    [here](https://github.com/djzager/ansible-role-nginx-k8s)
+* [operator-sdk](https://github.com/operator-framework/operator-sdk) if you are
+    ready to take your application to the next level
