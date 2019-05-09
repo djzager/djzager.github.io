@@ -8,26 +8,43 @@ date: 2019-03-06T17:23:58Z
 draft: true
 ---
 
-The [`k8s` module](https://docs.ansible.com/ansible/latest/modules/k8s_module.html)
-enables users to manage Kubernetes objects in [Ansible](https://www.ansible.com/).
-In [Reaching for the Stars with
-Ansible Galaxy](https://blog.openshift.com/reaching-for-the-stars-with-ansible-operator/)
-I created an Ansible Role, published it to [Ansible
-Galaxy](https://galaxy.ansible.com), and leveraged the [Ansible
-Operator](https://github.com/operator-framework/operator-sdk) to develop an
-application that extended the Kubernetes API. Here, I will show how to use
-the `k8s` module and the [`k8s` lookup
-plugin](https://docs.ansible.com/ansible/latest/plugins/lookup/k8s.html)
-to manage an application in Kubernetes.
+Ansible is a simple and effective IT automation platform. With the
+[`k8s` module](https://docs.ansible.com/ansible/latest/modules/k8s_module.html),
+Ansible is also effective tool for managing Kubernetes clusters. In this post I will
+demonstrate this by creating an Ansible Role with a couple of Kubernetes
+manifests, iterating on and growing them to make a configurable and
+cluster-agnostic Role for managing Nginx in Kubernetes.
 
-# Introduction
+Kubernetes objects are predominantly described in YAML files and these objects
+are used when communicating with the Kubernetes API to declare the
+[cluster's _desired state_](https://kubernetes.io/docs/concepts/#overview). The
+`kubectl` command line utility is the dominant mechanism for managing cluster
+state, but the `k8s` module allows direct interaction with the Kubernetes API,
+making it possible to not only duplicate the behavior of `kubectl
+create -f deployment.yaml` but to manage the application's entire lifecycle in
+Ansible.
 
-Kubernetes objects are predominantly described in YAML files like this one
-defining a
-[Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/):
+# Getting Started
+
+I create the Role using `ansible-galaxy init` and specify defaults in
+`defaults/main.yml`:
 
 ```yaml
-# application/deployment.yaml
+# Namespace to install into
+namespace: nginx
+
+# By default, add objects to cluster's desired state
+state: present
+```
+
+To start, my simple Nginx application has one
+[Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+and [Service](https://kubernetes.io/docs/concepts/services-networking/service/)
+included below. I store both in my Role's `files/` directory for easy
+consumption with the Files lookup plugin.
+
+```yaml
+# files/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -49,12 +66,8 @@ spec:
 - containerPort: 80
 ```
 
-I add this to the [cluster's _desired state_](https://kubernetes.io/docs/concepts/#overview)
-with `kubectl create -f application/deployment.yaml`. [Services](https://kubernetes.io/docs/concepts/services-networking/service/)
-allow me to define a policy for communicating with the Deployment:
-
 ```yaml
-# application/service.yaml
+# files/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -71,47 +84,7 @@ spec:
 app: nginx
 ```
 
-Deployments and Services are the basic building blocks for applications in
-Kubernetes. Ansible allows me to easily package these object definitions in an
-Ansible Role to simplify management of this application in Kubernetes.
-
-**Pre-Requisites**
-
-Software used while developing this post include:
-
-1. `ansible >= 2.6`- See the [installation guide](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) if you do not already have Ansible installed.
-1. `openshift >= 0.8` - The installation instructions can be found [here](https://github.com/openshift/openshift-restclient-python#installation).
-1. Minikube - Instructions for running Kubernetes locally can be found [here](https://kubernetes.io/docs/setup/minikube/).
-
-**Note**
-
-The source can be found on GitHub at
-[djzager/ansible-role-nginx-k8s](https://github.com/djzager/ansible-role-nginx-k8s)
-or on Ansible Galaxy at [djzager/nginx_k8s](https://galaxy.ansible.com/djzager/nginx_k8s).
-
-# The File Lookup Plugin
-
-Developing a Role for this application gives maximum reusability. Create the
-project using `ansible-galaxy`:
-
-```shell
-# In meta/main.yml I will make the role_name nginx-k8s
-$ ansible-galaxy init ansible-role-nginx-k8s
-```
-
-Set the defaults for the Role in `defaults/main.yml`:
-
-```yaml
-# Namespace to install into
-namespace: nginx
-
-# To uninstall from the cluster
-# state: absent
-state: present
-```
-
-Place the Deployment and Service YAML files in the `files/`
-directory and update `tasks/main.yml`:
+I update the generated `tasks/main.yml`:
 
 ```yaml
 - name: Make deployment state={{ state }}
@@ -151,8 +124,22 @@ ansible-role-nginx-k8s/
     main.yml
 ```
 
-Start Minikube, create the Namespace (or target another with
-`-e namespace=<existing_namespace>`), and run the playbook:
+I could create the Namespace in my Role by making my first task:
+
+```yaml
+- name: Make namespace state={{ state }}
+  k8s:
+    state: "{{ state }}"
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: nginx
+```
+
+However, I prefer for my Role to require as few
+[permissions](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
+as possible. Create the Namespace, run the playbook, and verify:
 
 ```shell
 $ kubectl create namespace nginx
@@ -192,20 +179,27 @@ replicaset.apps/nginx-deployment-7db75b8b78   2         2         2       3m48s
 With a little effort I packaged the Kubernetes object files defining a simple
 Nginx application in a Role that could be published to Ansible Galaxy (like it
 is [here](https://galaxy.ansible.com/djzager/nginx_k8s)) and included in more
-complex Kubernetes Deployments. Next, I will to take advantage of
+complex application deployments. Next, I will to take advantage of
 [Routes](https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html)
 when my application is deployed in [OpenShift](https://openshift.io/) using the
 [`k8s` lookup
 plugin](https://docs.ansible.com/ansible/latest/plugins/lookup/k8s.html) to
 intelligently react to APIs available in the cluster.
 
-# Conditionals
+# Lookups Part 1
 
-Now that we have a Role that can manage our application in Kubernetes, we want
-to extend it to make use of available APIs in the cluster we are deployed to.
-When our application is deployed in an OpenShift cluster, we can write our Role
-in such a way that it discovers the available APIs and adjusts accordingly.
-First, create the Route definition `files/route.yaml`:
+Now I want my Role to create a Route if the `route.openshift.io` API is
+available in the cluster. The `k8s` lookup plugin supports querying the
+available API groups in the cluster with the `cluster_info` parameter.
+Modify `tasks/main.yml` such that the first task is the API lookup:
+
+```yaml
+- name: Get cluster api_groups
+  set_fact:
+    api_groups: "{{ lookup('k8s', cluster_info='api_groups')}}"
+```
+
+Then I put the Route definition in `files/route.yaml`:
 
 ```yaml
 apiVersion: route.openshift.io/v1
@@ -222,20 +216,8 @@ spec:
     name: nginx-service
 ```
 
-The `k8s` lookup plugin supports querying the available API groups in the
-cluster with the `cluster_info` parameter. Modify `tasks/main.yml` such that
-the first task is the API lookup:
-
-```yaml
-
-- name: Get cluster api_groups
-  set_fact:
-    api_groups: "{{ lookup('k8s', cluster_info='api_groups')}}"
-```
-
-Route objects are in the `route.openshift.io` API group. We can conditionally
-manage the Route based on the presence of this API in the
-cluster. Add the Route task to `tasks/main.yml`:
+Finally, I add a task to manage my Route only if `route.openshift.io` is in the
+available API groups:
 
 ```yaml
 - name: Make route state={{ state }}
@@ -290,7 +272,7 @@ issue for me.
 # Templating with Jinja2
 
 I want to make the name, image, and size of my Nginx deployment configurable to anyone
-using my Role. Update `defaults/main.yml`:
+using my Role so I update `defaults/main.yml`:
 
 ```diff
 --- a/defaults/main.yml
@@ -319,7 +301,7 @@ using my Role. Update `defaults/main.yml`:
 
 Move the Deployment, Service, and Route specs to `templates/` and template out
 the names, labels, the Nginx image used in the Deployment, and the replica count.
-The Deployment template after the move:
+For example, my Deployment template after the changes:
 
 ```yaml
 # templates/deployment.yaml.j2
@@ -348,37 +330,17 @@ spec:
 ```
 
 Update `tasks/main.yml` to use the [template lookup
-plugin](https://docs.ansible.com/ansible/latest/plugins/lookup/template.html):
+plugin](https://docs.ansible.com/ansible/latest/plugins/lookup/template.html).
+The change to the task for managing the Deployment now looks like:
 
-```diff
---- a/tasks/main.yml
-+++ b/tasks/main.yml
-@@ -7,18 +7,15 @@
+```yaml
  - name: Make deployment state={{ state }}
    k8s:
      state: "{{ state }}"
--    namespace: "{{ namespace }}"
--    definition: "{{ lookup('file', 'deployment.yaml') | from_yaml }}"
-+    definition: "{{ lookup('template', 'deployment.yaml.j2') | from_yaml }}"
-
- - name: Make service state={{ state }}
-   k8s:
-     state: "{{ state }}"
--    namespace: "{{ namespace }}"
--    definition: "{{ lookup('file', 'service.yaml') | from_yaml }}"
-+    definition: "{{ lookup('template', 'service.yaml.j2') | from_yaml }}"
-
- - name: Make route state={{ state }}
-   k8s:
-     state: "{{ state }}"
--    namespace: "{{ namespace }}"
--    definition: "{{ lookup('file', 'route.yaml') | from_yaml }}"
-+    definition: "{{ lookup('template', 'route.yaml.j2') | from_yaml }}"
+     namespace: "{{ namespace }}"
+     definition: "{{ lookup('template', 'deployment.yaml.j2') | from_yaml }}"
 ```
 
-**NOTE**
-All of the changes can be found in [this
-commit](https://github.com/djzager/ansible-role-nginx-k8s/commit/ee0b006433615d42dfe6be4cab533af1e88f6ff6).
 Run the `playbook.yml` again and verify everything was properly deployed:
 
 ```shell
@@ -397,18 +359,16 @@ NAME                                      DESIRED   CURRENT   READY   AGE
 replicaset.apps/example-nginx-f8b965758   2         2         2       5m14s
 ```
 
-At this point I have an application, deployable to Kubernetes and OpenShift, and
-have made the name, image, and size of the Nginx app configurable at deployment
-time. As an added benefit to this change is that multiple instances of the
-application could be deployed in the same Namespace. Next, I will update my
-Deployment template to conditionally use OpenShift's
+At this point I have an Nginx application, deployable to Kubernetes and OpenShift,
+with the name, image, and size configurable at runtime.
+Next, I will update my Deployment template to conditionally use OpenShift's
 [DeploymentConfig](https://docs.openshift.com/container-platform/3.9/dev_guide/deployments/how_deployments_work.html)
-if the API group is available.
+and make replace the Nginx landing page with a ConfigMap.
 
-# Deployment Configuration
+# More Kubernetes Lookups
 
-I want a `DeploymentConfig` when my application is deployed in OpenShift.
-Update `templates/deployment.yaml.j2`:
+I want a `DeploymentConfig` when my application is deployed in OpenShift, so I
+update `templates/deployment.yaml.j2`:
 
 ```diff
 --- a/templates/deployment.yaml.j2
@@ -436,14 +396,10 @@ Update `templates/deployment.yaml.j2`:
 +{% endif %}
 ```
 
-That is it! This example demonstrates the power and flexibility inherent in
-using Ansible to manage applications in Kubernetes. To further demonstrate this,
-I want to replace the landing page of the Nginx web server by mounting a
+To replace the landing page of the Nginx web server, I will need to mount a
 [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
-into the Nginx container if found by name in the namespace I deploy the
-application.
-
-Set a default name for the ConfigMap to search for in `defaults/main.yml`:
+into the Nginx container if found by name in the same namespace I deploy to. I first
+set a default name for the ConfigMap to search for in `defaults/main.yml`:
 
 ```diff
 --- a/defaults/main.yml
@@ -457,8 +413,8 @@ Set a default name for the ConfigMap to search for in `defaults/main.yml`:
 +html_index_configmap: html-index-configmap
 ```
 
-Modify the `templates/deployment.yaml.j2` to include a volume mount if the `ConfigMap`
-is found in the namespace:
+Then, I modify the `templates/deployment.yaml.j2` to include a volume mount if
+we can find the `ConfigMap` with a lookup in the namespace:
 
 ```diff
 --- a/templates/deployment.yaml.j2
@@ -479,7 +435,7 @@ is found in the namespace:
 +{% endif %}
 ```
 
-Create a `ConfigMap` and execute the playbook:
+Finally, I create a `ConfigMap` and execute the playbook:
 
 ```shell
 $ CONFIGMAP=https://raw.githubusercontent.com/djzager/ansible-role-nginx-k8s/adc7d21e3a96c265ed4ad033fa07e4cc651dcc81/files/configmap.yaml
@@ -542,25 +498,26 @@ $ curl $(minikube ip):30973
 </html>
 ```
 
-That was fun. I was able to combine the `k8s` module and lookup plugins with
-Ansible's built-in templating engine to make my application cluster agnostic.
+This example demonstrates the power and flexibility inherent in
+using Ansible to manage applications in Kubernetes. I can write tasks that
+directly interact with the Kubernetes API, query the cluster with lookups, and
+bring my manifests to life using Jinja2 templating.
 
 **NOTE**
 
-* The changes required can be found in [this
-commit](https://github.com/djzager/ansible-role-nginx-k8s/commit/adc7d21e3a96c265ed4ad033fa07e4cc651dcc81))
-on the [ansible-role-nginx-k8s project](https://github.com/djzager/ansible-role-nginx-k8s).
-* If I remove the `ConfigMap` and re-execute the playbook the Deployment will
+If I remove the `ConfigMap` and re-execute the playbook the Deployment will
 **not** be updated. To get that
 behavior I would need to include an `{% else %}`, set `volumeMounts: []` and
 `volumes: []`, and use `merge_type: merge` in the task to properly handle
 changes between executions.
 
-# Application Configuration
 
-One last thing that I would like to do with my simple Nginx app is to make the
-number of Nginx worker processes and worker connections configurable.
-I also want to bounce the Nginx `Pods` when the configuration changes.
+( START HERE )
+# Nginx App Configuration
+
+One last thing that I would like to do is to make the
+number of Nginx worker processes and connections configurable as well as
+bounce the Nginx `Pods` when the Nginx configuration changes.
 Set defaults in `defaults/main.yml`:
 
 ```diff
@@ -734,3 +691,10 @@ What happens next is totally up to you. Some resources that may be useful:
     [here](https://github.com/djzager/ansible-role-nginx-k8s)
 * [operator-sdk](https://github.com/operator-framework/operator-sdk) if you are
     ready to take your application to the next level
+
+
+**Note**
+
+The source can be found on GitHub at
+[djzager/ansible-role-nginx-k8s](https://github.com/djzager/ansible-role-nginx-k8s)
+or on Ansible Galaxy at [djzager/nginx_k8s](https://galaxy.ansible.com/djzager/nginx_k8s).
